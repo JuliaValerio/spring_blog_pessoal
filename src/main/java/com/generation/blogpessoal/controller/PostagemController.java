@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
+//import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -64,7 +64,7 @@ public class PostagemController {
 		// CURRENT_TIMESTAMP());
 	}
 
-	@ResponseStatus(HttpStatus.NO_CONTENT)
+
 	@PutMapping("/{id}")
 	public void put(@PathVariable Long id, @Valid @RequestBody Postagem postagem) {
 		Optional<Postagem> post = postagemRepository.findById(id);
@@ -76,11 +76,13 @@ public class PostagemController {
 		// CURRENT_TIMESTAMP() WHERE id=id);
 	}
 	
-	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Postagem> deleteById(@PathVariable Long id) {
+	public ResponseEntity<?> deleteById(@PathVariable Long id) { 
 		return postagemRepository.findById(id)
-				.map(resposta -> ResponseEntity.ok(resposta))
+				.map(resposta -> {
+					postagemRepository.deleteById(id);
+					return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+				})
 				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 
 		// DELETE FROM tb_postagens WHERE id = id;
