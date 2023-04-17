@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.generation.blogpessoal.model.Postagem;
+import com.generation.blogpessoal.model.Tema;
 import com.generation.blogpessoal.repository.PostagemRepository;
+import com.generation.blogpessoal.repository.TemaRepository;
 
 import jakarta.validation.Valid;
 
@@ -30,6 +32,9 @@ public class PostagemController {
 
 	@Autowired
 	private PostagemRepository postagemRepository;
+	
+	@Autowired
+	private TemaRepository temaRepository;
 
 	@GetMapping
 	public ResponseEntity<List<Postagem>> getAll() {
@@ -65,15 +70,26 @@ public class PostagemController {
 	}
 
 
-	@PutMapping("/{id}")
-	public void put(@PathVariable Long id, @Valid @RequestBody Postagem postagem) {
-		Optional<Postagem> post = postagemRepository.findById(id);
-			if(post.isEmpty())
-				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-			ResponseEntity.status(HttpStatus.OK).body(postagemRepository.save(postagem));
-			
-		// UPDATE tb_postagens (titulo, texto, data) SET ("Título", "Texto",
-		// CURRENT_TIMESTAMP() WHERE id=id);
+//	@PutMapping("/{id}")
+//	public void put(@PathVariable Long id, @Valid @RequestBody Postagem postagem) {
+//		Optional<Tema> theme = temaRepository.findById(id);
+//		Optional<Postagem> post = postagemRepository.findById(id);
+//			if(post.isEmpty() && theme.isEmpty())
+//				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+//			ResponseEntity.status(HttpStatus.OK).body(postagemRepository.save(postagem));
+//			
+//		// UPDATE tb_postagens (titulo, texto, data) SET ("Título", "Texto",
+//		// CURRENT_TIMESTAMP() WHERE id=id);
+//	}
+	
+	@PutMapping
+	public ResponseEntity<Postagem> put(@Valid @RequestBody Postagem postagem){
+		return postagemRepository.findById(postagem.getId())
+				.map(reposta -> ResponseEntity.status(HttpStatus.OK)
+					.body(postagemRepository.save(postagem)))
+				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+		
+		// UPDATE tb_temas (id, descricao) SET ("id", "descricao") WHERE id=id);
 	}
 	
 	@DeleteMapping("/{id}")
