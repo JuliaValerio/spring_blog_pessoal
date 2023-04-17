@@ -63,13 +63,14 @@ public class TemaController {
     
     @PutMapping
     public ResponseEntity<?> put(@PathVariable Long id, @Valid @RequestBody Tema tema){
-		if (!temaRepository.existsById(id)) {
-            return ResponseEntity.badRequest().build();
+		if (temaRepository.existsById(id)) {
+	        return temaRepository.findById(tema.getId())
+	                .map(resposta -> ResponseEntity.status(HttpStatus.CREATED)
+	                .body(temaRepository.save(tema)))
+	                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
         }
-        return temaRepository.findById(tema.getId())
-            .map(resposta -> ResponseEntity.status(HttpStatus.CREATED)
-            .body(temaRepository.save(tema)))
-            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+
     }
 
     
