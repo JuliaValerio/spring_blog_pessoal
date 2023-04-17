@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.generation.blogpessoal.model.Postagem;
 import com.generation.blogpessoal.model.Tema;
+import com.generation.blogpessoal.repository.PostagemRepository;
 import com.generation.blogpessoal.repository.TemaRepository;
 
 import jakarta.validation.Valid;
@@ -31,6 +33,9 @@ public class TemaController {
     @Autowired
     private TemaRepository temaRepository;
     
+	@Autowired
+	private PostagemRepository postagemRepository;
+	
     @GetMapping
     public ResponseEntity<List<Tema>> getAll(){
         return ResponseEntity.ok(temaRepository.findAll());
@@ -57,22 +62,25 @@ public class TemaController {
     }
     
     @PutMapping
-    public ResponseEntity<Tema> put(@Valid @RequestBody Tema tema){
+    public ResponseEntity<?> put(@PathVariable Long id, @Valid @RequestBody Tema tema){
+		if (!temaRepository.existsById(id)) {
+            return ResponseEntity.badRequest().build();
+        }
         return temaRepository.findById(tema.getId())
             .map(resposta -> ResponseEntity.status(HttpStatus.CREATED)
             .body(temaRepository.save(tema)))
             .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
+
     
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        Optional<Tema> tema = temaRepository.findById(id);
-        
-        if(tema.isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        
-        temaRepository.deleteById(id);              
-    }
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deleteById(@PathVariable Long id) { 
+		return temaRepository.findById(id)
+				.map(resposta -> {
+					temaRepository.deleteById(id);  
+					return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+				})
+				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+	}
 
 }

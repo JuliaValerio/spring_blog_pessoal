@@ -70,26 +70,21 @@ public class PostagemController {
 	}
 
 
-//	@PutMapping("/{id}")
-//	public void put(@PathVariable Long id, @Valid @RequestBody Postagem postagem) {
-//		Optional<Tema> theme = temaRepository.findById(id);
-//		Optional<Postagem> post = postagemRepository.findById(id);
-//			if(post.isEmpty() && theme.isEmpty())
-//				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-//			ResponseEntity.status(HttpStatus.OK).body(postagemRepository.save(postagem));
-//			
-//		// UPDATE tb_postagens (titulo, texto, data) SET ("Título", "Texto",
-//		// CURRENT_TIMESTAMP() WHERE id=id);
-//	}
+
 	
 	@PutMapping
-	public ResponseEntity<Postagem> put(@Valid @RequestBody Postagem postagem){
-		return postagemRepository.findById(postagem.getId())
-				.map(reposta -> ResponseEntity.status(HttpStatus.OK)
-					.body(postagemRepository.save(postagem)))
-				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-		
-		// UPDATE tb_temas (id, descricao) SET ("id", "descricao") WHERE id=id);
+	public ResponseEntity<?> put(@Valid @RequestBody Postagem postagem){
+	    if (temaRepository.existsById(postagem.getTema().getId())) {
+			return postagemRepository.findById(postagem.getId())
+					.map(resposta -> {
+						postagemRepository.save(postagem);
+						return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+					})
+					.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+	    }
+	    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+	    
+	 // UPDATE tb_postagens (titulo, texto, data) SET ("Título", "Texto", "data") CURRENT_TIMESTAMP() WHERE id=id);
 	}
 	
 	@DeleteMapping("/{id}")
