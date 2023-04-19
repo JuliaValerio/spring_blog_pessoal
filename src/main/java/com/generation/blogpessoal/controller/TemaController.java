@@ -56,23 +56,20 @@ public class TemaController {
     }
     
     @PostMapping
-    public ResponseEntity<Tema> post(@Valid @RequestBody Tema tema){
+    public ResponseEntity<Tema> post(@Valid @RequestBody Tema tema){  	
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(temaRepository.save(tema));
     }
     
-    @PutMapping
-    public ResponseEntity<?> put(@PathVariable Long id, @Valid @RequestBody Tema tema){
-		if (temaRepository.existsById(id)) {
-	        return temaRepository.findById(tema.getId())
-	                .map(resposta -> ResponseEntity.status(HttpStatus.CREATED)
-	                .body(temaRepository.save(tema)))
-	                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTema(@PathVariable Long id, @Valid @RequestBody Tema tema) {
+        if (temaRepository.existsById(id)) {
+        	tema.setId(id); //Garante que o ID correto será atualizado
+        	temaRepository.save(tema);
+        	return ResponseEntity.status(HttpStatus.OK).build();
         }
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-
     
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteById(@PathVariable Long id) { 

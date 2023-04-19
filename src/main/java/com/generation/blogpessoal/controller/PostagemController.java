@@ -63,28 +63,23 @@ public class PostagemController {
 
 	@PostMapping
 	public ResponseEntity<Postagem> post(@Valid @RequestBody Postagem postagem) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(postagemRepository.save(postagem));
-
-		// INSERT INTO tb_postagens (titulo, texto, data) VALUES ("Título", "Texto",
-		// CURRENT_TIMESTAMP());
+	    if (!temaRepository.existsById(postagem.getTema().getId())) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+	    }
+	    return ResponseEntity.status(HttpStatus.CREATED).body(postagemRepository.save(postagem));
 	}
 
-
-
-	
 	@PutMapping
 	public ResponseEntity<?> put(@Valid @RequestBody Postagem postagem){
-	    if (temaRepository.existsById(postagem.getTema().getId())) {
-			return postagemRepository.findById(postagem.getId())
-					.map(resposta -> {
-						postagemRepository.save(postagem);
-						return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-					})
-					.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+	    if (!temaRepository.existsById(postagem.getTema().getId())) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 	    }
-	    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-	    
-	 // UPDATE tb_postagens (titulo, texto, data) SET ("Título", "Texto", "data") CURRENT_TIMESTAMP() WHERE id=id);
+	    return postagemRepository.findById(postagem.getId())
+	            .map(resposta -> {
+	                postagemRepository.save(postagem);
+	                return ResponseEntity.status(HttpStatus.OK).build();
+	            })
+	            .orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
 	}
 	
 	@DeleteMapping("/{id}")
@@ -97,6 +92,5 @@ public class PostagemController {
 				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 
 		// DELETE FROM tb_postagens WHERE id = id;
-
 	}
 }
