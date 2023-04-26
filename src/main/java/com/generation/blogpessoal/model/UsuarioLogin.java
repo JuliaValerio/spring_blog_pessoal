@@ -1,20 +1,22 @@
 package com.generation.blogpessoal.model;
 
+import java.util.UUID;
+
 public class UsuarioLogin {
 	
-	private Long id;
+	private UUID id;
 	private String nome;
 	private String usuario;
 	private String senha;
 	private String foto;
 	private String token;
 
-	public Long getId() {
+	public UUID getId() {
 		return this.id;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setId(UUID uuid) {
+		this.id = uuid;
 	}
 
 	public String getNome() {
