@@ -1,6 +1,7 @@
 package com.generation.blogpessoal.model;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -20,10 +21,12 @@ import jakarta.validation.constraints.Size;
 @Entity
 @Table(name = "tb_usuarios")
 public class Usuario {
+	
+	UUID uuid = UUID.randomUUID();
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	private Long id;
+	private UUID id;
 
 	@NotNull(message = "O Atributo Nome é Obrigatório!")
 	private String nome;
@@ -45,11 +48,11 @@ public class Usuario {
 
 	/* Insira os Getters and Setters */
 
-	public Long getId() {
+	public UUID getId() {
 		return this.id;
 	}
 
-	public void setId(Long id) {
+	public void setId(UUID id) {
 		this.id = id;
 	}
 
