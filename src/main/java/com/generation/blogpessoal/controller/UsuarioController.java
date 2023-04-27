@@ -15,9 +15,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
-import com.generation.blogpessoal.model.UsuarioLogin;
 import com.generation.blogpessoal.model.Usuario;
+import com.generation.blogpessoal.model.UsuarioLogin;
 import com.generation.blogpessoal.repository.UsuarioRepository;
 import com.generation.blogpessoal.service.UsuarioService;
 
@@ -60,19 +61,26 @@ public class UsuarioController {
 	@PostMapping("/cadastrar")
 	public ResponseEntity<Usuario> postUsuario(@RequestBody @Valid Usuario usuario) {
 
-		return usuarioService.cadastrarUsuario(usuario)
-			.map(resposta -> ResponseEntity.status(HttpStatus.CREATED).body(resposta))
-			.orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
+	    usuario.setSenha(usuarioService.criptografarSenha(usuario.getSenha()));
 
+	    return usuarioService.cadastrarUsuario(usuario)
+	            .map(resposta -> ResponseEntity.status(HttpStatus.CREATED).body(resposta))
+	            .orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
 	}
 
 	@PutMapping("/atualizar")
-	public ResponseEntity<Usuario> putUsuario(@Valid @RequestBody Usuario usuario) {
+	public Optional<Usuario> atualizarUsuario(Usuario usuario) {
 		
-		return usuarioService.atualizarUsuario(usuario)
-			.map(resposta -> ResponseEntity.status(HttpStatus.OK).body(resposta))
-			.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-		
+		if(usuarioRepository.findById(usuario.getId()).isPresent()) {
+			Optional<Usuario> buscaUsuario = usuarioRepository.findByUsuario(usuario.getUsuario());
+			
+			if((buscaUsuario.isPresent()) && (buscaUsuario.get().getId() != usuario.getId()))
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário não existe", null);
+			
+			usuario.setSenha(usuarioService.criptografarSenha(usuario.getSenha()));
+			
+			return Optional.ofNullable(usuarioRepository.save(usuario));
+		}	
+		return Optional.empty();
 	}
-
 }
