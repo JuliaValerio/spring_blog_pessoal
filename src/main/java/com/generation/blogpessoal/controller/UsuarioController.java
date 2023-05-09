@@ -2,7 +2,6 @@ package com.generation.blogpessoal.controller;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,10 +14,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.generation.blogpessoal.model.Usuario;
 import com.generation.blogpessoal.model.UsuarioLogin;
+import com.generation.blogpessoal.model.Usuario;
 import com.generation.blogpessoal.repository.UsuarioRepository;
 import com.generation.blogpessoal.service.UsuarioService;
 
@@ -43,7 +41,7 @@ public class UsuarioController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Usuario> getById(@PathVariable UUID id) {
+	public ResponseEntity<Usuario> getById(@PathVariable Long id) {
 		return usuarioRepository.findById(id)
 			.map(resposta -> ResponseEntity.ok(resposta))
 			.orElse(ResponseEntity.notFound().build());
@@ -61,26 +59,19 @@ public class UsuarioController {
 	@PostMapping("/cadastrar")
 	public ResponseEntity<Usuario> postUsuario(@RequestBody @Valid Usuario usuario) {
 
-	    usuario.setSenha(usuarioService.criptografarSenha(usuario.getSenha()));
+		return usuarioService.cadastrarUsuario(usuario)
+			.map(resposta -> ResponseEntity.status(HttpStatus.CREATED).body(resposta))
+			.orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
 
-	    return usuarioService.cadastrarUsuario(usuario)
-	            .map(resposta -> ResponseEntity.status(HttpStatus.CREATED).body(resposta))
-	            .orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
 	}
 
 	@PutMapping("/atualizar")
-	public Optional<Usuario> atualizarUsuario(Usuario usuario) {
+	public ResponseEntity<Usuario> putUsuario(@Valid @RequestBody Usuario usuario) {
 		
-		if(usuarioRepository.findById(usuario.getId()).isPresent()) {
-			Optional<Usuario> buscaUsuario = usuarioRepository.findByUsuario(usuario.getUsuario());
-			
-			if((buscaUsuario.isPresent()) && (buscaUsuario.get().getId() != usuario.getId()))
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário não existe", null);
-			
-			usuario.setSenha(usuarioService.criptografarSenha(usuario.getSenha()));
-			
-			return Optional.ofNullable(usuarioRepository.save(usuario));
-		}	
-		return Optional.empty();
+		return usuarioService.atualizarUsuario(usuario)
+			.map(resposta -> ResponseEntity.status(HttpStatus.OK).body(resposta))
+			.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+		
 	}
+
 }

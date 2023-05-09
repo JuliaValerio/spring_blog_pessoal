@@ -12,21 +12,29 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "tb_temas")
 public class Tema {
-	
+	// Atributos
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull(message = "O Atributo Descrição é obrigatório")
+	@NotBlank(message = "O atributo 'descricao' é obrigatório!")
+	@Size(min = 5, max = 255, message = "O atributo 'descricao' deve ter no mínimo 5 e no máximo 255 caracteres!")
 	private String descricao;
+	
+	// Relacionamento
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "tema", cascade = CascadeType.REMOVE)
+	@JsonIgnoreProperties("tema")
+	private List<Postagem> postagem;
 
+	// Getters and Setters do Tema
 	public Long getId() {
-		return this.id;
+		return id;
 	}
 
 	public void setId(Long id) {
@@ -34,17 +42,14 @@ public class Tema {
 	}
 
 	public String getDescricao() {
-		return this.descricao;
+		return descricao;
 	}
 
 	public void setDescricao(String descricao) {
 		this.descricao = descricao;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "tema", cascade = CascadeType.REMOVE)
-	@JsonIgnoreProperties("tema")
-	private List<Postagem> postagem;
-
+	// Getters and Setters da Postagem
 	public List<Postagem> getPostagem() {
 		return postagem;
 	}
